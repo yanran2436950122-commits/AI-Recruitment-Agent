@@ -1,0 +1,48 @@
+services:
+  app:
+    build: .
+    container_name: ai-recruitment-agent-app
+    ports:
+      - "8000:8000"
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      POSTGRES_DSN: postgresql://postgres:postgres@postgres:5432/ai_recruitment
+      CHROMA_HOST: chroma
+      CHROMA_PORT: 8000
+      VECTOR_BACKEND: local
+    volumes:
+      - .:/app
+    depends_on:
+      - redis
+      - postgres
+      - chroma
+
+  redis:
+    image: redis:7-alpine
+    container_name: ai-recruitment-agent-redis
+    ports:
+      - "6379:6379"
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: ai-recruitment-agent-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ai_recruitment
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  chroma:
+    image: chromadb/chroma:latest
+    container_name: ai-recruitment-agent-chroma
+    ports:
+      - "8001:8000"
+    volumes:
+      - chroma_data:/chroma/chroma
+
+volumes:
+  postgres_data:
+  chroma_data:
